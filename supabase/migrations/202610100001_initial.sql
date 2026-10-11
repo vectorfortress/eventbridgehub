@@ -137,8 +137,8 @@ returns boolean language sql stable security definer set search_path = '' as $$
 $$;
 create or replace function private.plans_proposal(pid uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
-  select exists(select 1 from public.proposals p where p.id=pid and p.planner_id=(select auth.uid())
-      and q.expires_at >= current_date);
+  select exists(select 1 from public.proposals p
+                where p.id=pid and p.planner_id=(select auth.uid()));
 $$;
 create or replace function private.customer_sees_proposal(pid uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
@@ -227,6 +227,8 @@ begin
   return new;
 end;
 $$;
+create trigger validate_event_update before update on public.events
+for each row execute function private.validate_event_update();
 
 alter table public.profiles enable row level security;
 alter table public.businesses enable row level security;
